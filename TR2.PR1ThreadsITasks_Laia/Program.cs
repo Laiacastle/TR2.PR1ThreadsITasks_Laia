@@ -70,7 +70,7 @@
                     case 5: color = "Magenta"; break;
                 }
                 //Comensal pensa
-                Console.WriteLine(MsgPensar, id);
+                ChangeTextColor(color, MsgPensar, id);
                 Thread.Sleep(pensar);
                 //Comprova que no estiguin agafats els palets i bloqueja els palets mentres esta cambiant el seu estat
                 lock (paletLock)
@@ -80,28 +80,46 @@
                         continue; // reintentar en el bucle
                     }
                     //Agafa el palet esquerre
-                    Console.WriteLine(MsgAgafarPaletEsq, id);
+                    ChangeTextColor(color, MsgAgafarPaletEsq, id);
                     paletsC[0].Agafat = true;
                     //Agafa el palet dret
-                    Console.WriteLine(MsgAgafarPaletDret, id);
+                    ChangeTextColor(color, MsgAgafarPaletDret, id);
                     paletsC[1].Agafat = true;
 
                 }
                 //Menja
-                Console.WriteLine(MsgMenjar, id);
+                ChangeTextColor(color, MsgMenjar, id);
                 Thread.Sleep(menjar);
                 //Deixa el palet esquerre
-                Console.WriteLine(MsgDeixarPaletEsq, id);
+                ChangeTextColor(color, MsgDeixarPaletEsq, id);
                 lock (paletLock)
                 {
                     paletsC[0].Agafat = false;
                     //Deixa el palet dret
-                    Console.WriteLine(MsgDeixarPaletDret, id);
+                    ChangeTextColor(color, MsgDeixarPaletDret, id);
                     paletsC[1].Agafat = false;
                 }
-
-
             }
+        }
+
+        public static void ChangeTextColor(string color, string msg, int id)
+        {
+
+            lock (consolaLock)
+            {
+                switch (color)
+                {
+                    case "Magenta": Console.ForegroundColor = ConsoleColor.Magenta; break;
+                    case "Blue": Console.ForegroundColor = ConsoleColor.Blue; break;
+                    case "Green": Console.ForegroundColor = ConsoleColor.Green; break;
+                    case "Yellow": Console.ForegroundColor = ConsoleColor.Yellow; break;
+                    case "Red": Console.ForegroundColor = ConsoleColor.Red; break;
+                    default: Console.ForegroundColor = ConsoleColor.Black; break;
+                }
+                Console.WriteLine(msg, id);
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+
         }
     }
 }
