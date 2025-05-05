@@ -9,6 +9,9 @@
         public static Palet paletDDret = new Palet(4, false);
         public static Palet paletE = new Palet(5, false);
         public static Palet[] palets = [paletAEsq, paletBDret, paletCEsq, paletDDret, paletE];
+
+        //Crear Cola
+        public static Queue<Thread> Cola = new Queue<Thread>();
         static void Main()
         {
             //Crear comersals
@@ -17,6 +20,20 @@
             Thread Comensal3 = new Thread(() => Menjar(3));
             Thread Comensal4 = new Thread(() => Menjar(4));
             Thread Comensal5 = new Thread(() => Menjar(5));
+
+            //Afegir Comersals a la cola
+            Cola.Enqueue(Comensal1);
+            Cola.Enqueue(Comensal2);
+            Cola.Enqueue(Comensal3);
+            Cola.Enqueue(Comensal4);
+            Cola.Enqueue(Comensal5);
+
+            //iniciar cola
+            while (Cola.Count > 0)
+            {
+                Thread t = Cola.Dequeue();
+                t.Start();
+            }
         }
 
         public static void Menjar(int id)
@@ -36,6 +53,7 @@
                 int menjar = r.Next(500, 1000);
                 Palet[] paletsC = { palets.Where(n => n.Id == id).FirstOrDefault(), palets.Where(n => n.Id == id - 1).FirstOrDefault() };
                 DateTime iniciFam = DateTime.Now;
+                //Canvia el color de consola depenen del comensal, en cas de que sigui el 1 li asigna el palet dret 5
                 switch (id)
                 {
                     case 1:
@@ -47,25 +65,28 @@
                     case 4: color = "Blue"; break;
                     case 5: color = "Magenta"; break;
                 }
+                //Comensal pensa
                 Console.WriteLine(MsgPensar, id);
                 Thread.Sleep(pensar);
-                
-
+                //Comprova que no estiguin agafats els palets
                 if (paletsC[0].Agafat || paletsC[1].Agafat)
                 {
                      continue; // reintentar en el bucle
                 }
+                //Agafa palet esquerre
                 Console.WriteLine(MsgAgafarPaletEsq, id);
                 paletsC[0].Agafat = true;
+                //Agafa palet dret
                 Console.WriteLine(MsgAgafarPaletDret, id);
                 paletsC[1].Agafat = true;
-
+                //Menja
                 Console.WriteLine(MsgMenjar, id);
                 Thread.Sleep(menjar);
-                
+                //Deixa el palet esquerre
                 Console.WriteLine(MsgDeixarPaletEsq, id);
                 
                 paletsC[0].Agafat = false;
+                //Deixa el palet dret
                 Console.WriteLine(MsgDeixarPaletDret, id);
                 paletsC[1].Agafat = false;
                 
