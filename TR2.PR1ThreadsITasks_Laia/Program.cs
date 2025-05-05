@@ -16,6 +16,9 @@
         //Crear locks
         public static object consolaLock = new object();
         public static object paletLock = new object();
+
+        //Crear variables d'informacio
+        public static Dictionary<int, EstadisticaComensal> estadistiques = new();
         static void Main()
         {
             //Crear comersals
@@ -32,12 +35,30 @@
             Cola.Enqueue(Comensal4);
             Cola.Enqueue(Comensal5);
 
+            //Iniciem les estadistiques
+            for (int i = 1; i <= 5; i++)
+            {
+                estadistiques[i] = new EstadisticaComensal { Id = i, VecesMenjat = 0, TempsMaxFam = 0 };
+            }
             //iniciar cola
             while (Cola.Count > 0)
             {
                 Thread t = Cola.Dequeue();
                 t.Start();
             }
+            //Creem temps maxim d'execucio
+            Thread timerThread = new Thread(() =>
+            {
+                Thread.Sleep(35000); // Espera 35 segundos
+                lock (consolaLock)
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("Han passat 35 segons. Finalitzant programa...");
+                }
+                GuardarCSV();
+                Environment.Exit(0); // Termina la aplicación
+            });
+            timerThread.Start();
         }
 
         public static void Menjar(int id)
@@ -49,7 +70,8 @@
                     MsgAgafarPaletEsq = "l'Comensal {0} ha agafat el palet esquerra",
                     MsgAgafarPaletDret = "l'Comensal {0} ha agafat el palet dret",
                     MsgDeixarPaletEsq = "l'Comensal {0} ha deixat el palet esquerra",
-                    MsgDeixarPaletDret = "l'Comensal {0} ha deixat el palet dret";
+                    MsgDeixarPaletDret = "l'Comensal {0} ha deixat el palet dret",
+                    MsgFam = "Comensal {0} ha passat fam > 15s. Finalitzant...";
 
                 string color = "Black";
                 Random r = new Random();
@@ -77,6 +99,18 @@
                 {
                     if (paletsC[0].Agafat || paletsC[1].Agafat)
                     {
+                        double tempsFam = (DateTime.Now - iniciFam).TotalSeconds;
+                        //Actualitza el temps max de fam
+                        lock (estadistiques)
+                        {
+                            if (estadistiques[id].TempsMaxFam >= 15)
+                            {
+                                ChangeTextColor(color, MsgFam, id);
+                                Environment.Exit(0);
+                            }
+                            if (tempsFam > estadistiques[id].TempsMaxFam)
+                                estadistiques[id].TempsMaxFam = tempsFam;
+                        }
                         continue; // reintentar en el bucle
                     }
                     //Agafa el palet esquerre
@@ -90,6 +124,11 @@
                 //Menja
                 ChangeTextColor(color, MsgMenjar, id);
                 Thread.Sleep(menjar);
+                //Afegeix una vegada mes que ha menjat
+                lock (estadistiques)
+                {
+                    estadistiques[id].VecesMenjat++;
+                }
                 //Deixa el palet esquerre
                 ChangeTextColor(color, MsgDeixarPaletEsq, id);
                 lock (paletLock)
@@ -120,6 +159,18 @@
                 Console.ForegroundColor = ConsoleColor.Gray;
             }
 
+        }
+        public static void GuardarCSV()
+        {
+            string path = "../../../estadistiques.csv";
+            using (StreamWriter writer = new StreamWriter(path))
+            {
+                writer.WriteLine("Id,TempsMaxFam,VecesMenjat");
+                foreach (var est in estadistiques.Values)
+                {
+                    writer.WriteLine($"{est.Id},{est.TempsMaxFam:F2},{est.VecesMenjat}");
+                }
+            }
         }
     }
 }
