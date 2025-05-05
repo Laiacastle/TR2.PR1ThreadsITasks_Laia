@@ -12,6 +12,10 @@
 
         //Crear Cola
         public static Queue<Thread> Cola = new Queue<Thread>();
+
+        //Crear locks
+        public static object consolaLock = new object();
+        public static object paletLock = new object();
         static void Main()
         {
             //Crear comersals
@@ -68,28 +72,34 @@
                 //Comensal pensa
                 Console.WriteLine(MsgPensar, id);
                 Thread.Sleep(pensar);
-                //Comprova que no estiguin agafats els palets
-                if (paletsC[0].Agafat || paletsC[1].Agafat)
+                //Comprova que no estiguin agafats els palets i bloqueja els palets mentres esta cambiant el seu estat
+                lock (paletLock)
                 {
-                     continue; // reintentar en el bucle
+                    if (paletsC[0].Agafat || paletsC[1].Agafat)
+                    {
+                        continue; // reintentar en el bucle
+                    }
+                    //Agafa el palet esquerre
+                    Console.WriteLine(MsgAgafarPaletEsq, id);
+                    paletsC[0].Agafat = true;
+                    //Agafa el palet dret
+                    Console.WriteLine(MsgAgafarPaletDret, id);
+                    paletsC[1].Agafat = true;
+
                 }
-                //Agafa palet esquerre
-                Console.WriteLine(MsgAgafarPaletEsq, id);
-                paletsC[0].Agafat = true;
-                //Agafa palet dret
-                Console.WriteLine(MsgAgafarPaletDret, id);
-                paletsC[1].Agafat = true;
                 //Menja
                 Console.WriteLine(MsgMenjar, id);
                 Thread.Sleep(menjar);
                 //Deixa el palet esquerre
                 Console.WriteLine(MsgDeixarPaletEsq, id);
-                
-                paletsC[0].Agafat = false;
-                //Deixa el palet dret
-                Console.WriteLine(MsgDeixarPaletDret, id);
-                paletsC[1].Agafat = false;
-                
+                lock (paletLock)
+                {
+                    paletsC[0].Agafat = false;
+                    //Deixa el palet dret
+                    Console.WriteLine(MsgDeixarPaletDret, id);
+                    paletsC[1].Agafat = false;
+                }
+
 
             }
         }
