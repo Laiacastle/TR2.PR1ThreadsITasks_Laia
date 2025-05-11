@@ -2,6 +2,7 @@
 {
     public class Program
     {
+        /*
         //Crear els palets
         public static Palet paletAEsq = new Palet(1, false);
         public static Palet paletBDret = new Palet(2, false);
@@ -171,6 +172,6 @@
                     writer.WriteLine($"{est.Id},{est.TempsMaxFam:F2},{est.VecesMenjat}");
                 }
             }
-        }
+        }*/
     }
 }
