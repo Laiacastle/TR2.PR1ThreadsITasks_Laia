@@ -6,12 +6,16 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
 {
     public class Program
     {
+        // Tama;o de la pantalla
         public const int desiredHeight = 20, desiredWidth = 40;
-
+        //Lock
         public static readonly object objLock = new();
+        //Random
         public static readonly Random rn = new Random();
+        //Creamos la nave y los asteroides
         public static Ship ship = new Ship(desiredWidth / 2, desiredHeight - 1);
         public static List<Asteroid> asteroids = new List<Asteroid>();
+        //Estadisticas
         public static int dodged = 0;
         public static int game = 0;
         public static bool isRunning = true;
@@ -28,7 +32,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
                                  "--------------\n" +
                                  "| 3   Exit   |\n" +
                                  "--------------\n";
-
+            //configurammos las pantalla
             Console.CursorVisible = false;
             Console.SetWindowSize(20, 10);
             Console.SetBufferSize(desiredWidth + 1, desiredHeight);
@@ -36,24 +40,31 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
 
             while (isRunning)
             {
+                //Cogemos que partida es
                 var statsList = GetStats();
                 game = (statsList.Count > 0) ? statsList.Max(s => s.Game) : 0;
+                //----------------------------------------------Menu-----------------------------------
                 var selection = await MenuT(Menu);
                 switch (selection)
                 {
+                    //------------------------------------------JUEGO-------------------------------------
                     case 1:
+                        //reseteamos el juego
                         game++;
                         ship = new Ship(desiredWidth / 2, desiredHeight - 1);
                         ship.Lives = 3;
                         dodged = 0;
-
+                        //Creamos el contador
                         var sw = Stopwatch.StartNew();
 
                         while (ship.Lives > 0)
                         {
+                            //Creamos el token de cancelacion
                             CancellationTokenSource cts = new();
+                            //limpiamos asteroides
                             asteroids.Clear();
 
+                            //Creamos las tareas principales
                             Task webTask = Task.Run(() => WebAnalysisSimulator(cts, cts.Token));
                             Task logicTask = Task.Run(() => Logic(cts, cts.Token));
                             Task drawingTask = Task.Run(() => Drawing(cts, cts.Token));
@@ -70,6 +81,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
                             }
                             catch (OperationCanceledException)
                             {
+                                //FIN DEL JUEGO
                                 ship.Lives--;
 
                                 if (ship.Lives <= 0)
@@ -79,18 +91,18 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
                                     WriteCentered(MsgEnd, 5);
                                     WriteCentered(string.Format(MsgSeconds, dodged), 7);
                                     WriteCentered(string.Format(MsgTimePlayed, sw.ElapsedMilliseconds / 1000), 8);
-                                    await InsertIntoFile(new Stats(game, sw.ElapsedMilliseconds / 1000, dodged));
+                                    InsertIntoFile(new Stats(game, sw.ElapsedMilliseconds / 1000, dodged));
                                     WriteCentered("Pulsa cualquier tecla para continuar...", 10);
                                     Console.ReadKey(true);
                                 }
                             }
                         }
                         break;
-
+                    //----------------Ver estadisticas-----------
                     case 2:
-                        await ViewStats();
+                        ViewStats();
                         break;
-
+                    //-----------------Salir---------------
                     case 3:
                         isRunning = false;
                         break;
@@ -105,6 +117,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
             while (true)
             {
                 Console.Clear();
+                //printamos el menu
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 string[] lines = menu.Split('\n');
                 int topOffset = (Console.WindowHeight - lines.Length) / 2;
@@ -116,6 +129,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
 
                 Console.ResetColor();
                 Console.SetCursorPosition((Console.WindowWidth - 20) / 2, topOffset + 1);
+                //Comprovamos el input
                 string input = Console.ReadLine() ?? "";
 
                 if (input == "1" || input == "2" || input == "3")
@@ -143,6 +157,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
                 lock (objLock)
                 {
                     Console.Clear();
+                    //printamos las vidas
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.SetCursorPosition(0, 0);
                     for (int i = 0; i < ship.Lives; i++)
@@ -153,7 +168,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
                     Console.ForegroundColor = ConsoleColor.Blue;
                     Console.SetCursorPosition(20, 0);
                     Console.Write("Pulsa 'Q' para salir");
-
+                    //Asteroides
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     foreach (var a in asteroids)
                     {
@@ -163,7 +178,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
                             Console.Write("*");
                         }
                     }
-
+                    //Nave
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.SetCursorPosition(ship.PosX, ship.PosY);
                     Console.Write("^");
@@ -177,6 +192,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
 
         public static async Task Logic(CancellationTokenSource cts, CancellationToken token)
         {
+            //tiempo entre asteroides
             int asteroidSpawnInterval = 500;
             DateTime lastAsteroidSpawn = DateTime.Now;
 
@@ -186,6 +202,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
 
                 if (Console.KeyAvailable)
                 {
+                    //Comprovamos input constantemente
                     var key = Console.ReadKey(true).Key;
                     lock (objLock)
                     {
@@ -216,7 +233,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
                     {
                         if (a.PosY == ship.PosY && a.PosX == ship.PosX)
                         {
-                            Console.Beep(); // Sonido de colisión
+                            Console.Beep(); // Sonido de colisión que no funciona pero lo pongo igual
                             cts.Cancel();
                             token.ThrowIfCancellationRequested();
                         }
@@ -243,9 +260,9 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
             }
         }
 
-        public static async Task<List<Stats>> ViewStats()
+        public static void ViewStats()
         {
-            List<Stats> stats = new List<Stats>();
+            
             string filePath = "../../../estadisticas.csv";
 
             Console.Clear();
@@ -258,7 +275,7 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
                 Console.WriteLine("\nPulsa cualquier tecla para volver...");
                 Console.ReadKey(true);
                 Console.Clear();
-                return stats;
+                return;
             }
 
             using (var reader = new StreamReader(filePath))
@@ -280,7 +297,6 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
                     var parts = line.Split(';');
                     if (parts.Length == 3)
                     {
-                        stats.Add(new Stats(int.Parse(parts[0]), long.Parse(parts[1]), int.Parse(parts[2])));
                         Console.WriteLine($"Partida #{parts[0]} | Tiempo (s): {parts[1]} | Asteroides esquivados: {parts[2]}");
                     }
                 }
@@ -291,10 +307,9 @@ namespace TR2.PR1ThreadsAndTasks_Laia_Asteroides
             Console.WriteLine("\nPulsa cualquier tecla para volver al menú...");
             Console.ReadKey(true);
             Console.Clear();
-            return stats;
         }
 
-        public static async Task InsertIntoFile(Stats stats)
+        public static void InsertIntoFile(Stats stats)
         {
             string filePath = "../../../estadisticas.csv";
             bool fileExists = File.Exists(filePath);
