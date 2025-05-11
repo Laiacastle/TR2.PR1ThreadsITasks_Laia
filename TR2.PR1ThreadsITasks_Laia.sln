@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TR2.PR1ThreadsITasks_Laia", "TR2.PR1ThreadsITasks_Laia\TR2.PR1ThreadsITasks_Laia.csproj", "{D9953F5F-22B0-4267-B4EC-FF96B315AC05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TR2.PR1ThreadsAndTasks_Laia_Asteroides", "TR2.PR1ThreadsAndTasks_Laia_Asteroides\TR2.PR1ThreadsAndTasks_Laia_Asteroides.csproj", "{CE76BA4A-57E3-48F6-BBC9-15B670DB4A02}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{D9953F5F-22B0-4267-B4EC-FF96B315AC05}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9953F5F-22B0-4267-B4EC-FF96B315AC05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9953F5F-22B0-4267-B4EC-FF96B315AC05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE76BA4A-57E3-48F6-BBC9-15B670DB4A02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE76BA4A-57E3-48F6-BBC9-15B670DB4A02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE76BA4A-57E3-48F6-BBC9-15B670DB4A02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE76BA4A-57E3-48F6-BBC9-15B670DB4A02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
